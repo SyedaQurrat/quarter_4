@@ -5,7 +5,7 @@ from runner import AgentRunner
 agent = Agent(name="SimpleAgent", instructions="Just echo the message back.")
 runner = AgentRunner(agents=[agent])
 
-print("✅ AgentRunner started!\n")
+print(" AgentRunner started!\n")
 
 # Example run without loop
 user_input = "Hello from Syeda!"
