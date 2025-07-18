@@ -1,27 +1,23 @@
 import os
 from dotenv import load_dotenv
 import chainlit as cl
-
-#from openai import
 from agents import AsyncOpenAI
 
-#  Load API Key from .env file
+#  Load API key
 load_dotenv()
-# Get GEMINI_API_KEY from enviroment
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 
-# Error if API key is not found
 if not gemini_api_key:
     raise ValueError("GEMINI_API_KEY not found in .env file!")
 
-# 🔧 Setup Gemini client using OpenAI-style SDK
+#  Setup Gemini client (OpenAI style)
 client = AsyncOpenAI(
     api_key=gemini_api_key,
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
-#  Writer Agent Class
-class WriterAgent:
+#  Translator Agent class (like WriterAgent)
+class TranslatorAgent:
     def __init__(self, name, instructions, model_name="gemini-2.0-flash"):
         self.name = name
         self.instructions = instructions
@@ -38,21 +34,27 @@ class WriterAgent:
         )
         return res.choices[0].message.content
 
-#  Create the Writer Agent
-writer_agent = WriterAgent(
-    name="Writer Agent",
-    instructions="You are a creative writing agent. Generate beautiful poems, stories, essays, and emails."
+# Create the Translator Agent
+translator_agent = TranslatorAgent(
+    name="Translator Agent",
+    instructions="""
+You are a professional translator. 
+When a user asks like: 'Translate to Urdu: The future is bright.',
+you must detect the target language and return only the translated sentence.
+Do not include explanation, just output the translation.
+"""
 )
 
-#  Chainlit: Handle user messages
+# Handle user messages
 @cl.on_message
 async def on_message(msg: cl.Message):
     user_input = msg.content
-    response = await writer_agent.run(user_input)
+    response = await translator_agent.run(user_input)
     await cl.Message(content=response).send()
 
-#  Optional: Welcome message
+# 🙋 Optional welcome
 @cl.on_chat_start
 async def start():
-    await cl.Message(content=" Writer Agent is read! Send me a topic and I’ll write for you ").send()
-    
+    await cl.Message(
+        content="Translator Agent is ready!\nSend: `Translate to Urdu: The world is changing fast.`"
+    ).send()
